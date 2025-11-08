@@ -3,7 +3,7 @@
 let parentcontainer = document.getElementById("parent-container")
 
 async function getPlaylist() {
-    const url = "http://localhost:3000/songs"
+    const url = "http://localhost:80/songs"
     try {
         const response = await fetch(url);
         if (!response.ok) {
