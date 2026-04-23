@@ -1,0 +1,13 @@
+groups:
+  - name: songrandomizer_recording
+    interval: 30s
+    rules:
+      - record: job:request_success_rate:ratio
+        expr: >
+          sum(rate(http_requests_total{code!="500"}[5m]))
+          / sum(rate(http_requests_total[5m])) * 100
+
+      - record: job:request_latency_slo:ratio
+        expr: >
+          sum(rate(http_request_duration_seconds_bucket{le="0.5"}[5m]))
+          / sum(rate(http_request_duration_seconds_count[5m])) * 100

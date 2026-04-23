@@ -1,6 +1,27 @@
 version: '3.9'
 
 services:
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html
+      - ./script.js:/usr/share/nginx/html/script.js
+      - ./style.css:/usr/share/nginx/html/style.css
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "80:3000" 
+    env_file:
+      - ./.env
+    command: ["/app/song_randomizer"]
+    working_dir: /app
+
   postgres:
     image: postgres:15-alpine
     env_file:
@@ -15,17 +36,28 @@ services:
       interval: 5s
       retries: 5
 
-  backend:
-    build: ./backend
-    depends_on:
-      postgres:
-        condition: service_healthy
+  prometheus:
+    image: prom/prometheus
     ports:
-      - "80:3000" # match main.go ListenAndServe
-    env_file:
-      - ./.env
-    command: ["/app/song_randomizer"]
-    working_dir: /app
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./recording_rules.yml:/etc/prometheus/recording_rules.yml
 
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana  
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
 volumes:
   pgdata:
+  grafana_data:

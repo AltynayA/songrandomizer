@@ -1,0 +1,20 @@
+groups:
+  - name: songrandomizer_alerts
+    rules:
+      - alert: HighErrorRate_Warning
+        expr: rate(http_requests_total{code="500"}[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "error rate > 1% for 1min"
+
+      - alert: HighErrorRate_Critical
+        expr: rate(http_requests_total{code="500"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "error rate > 5% for 2mins"
+
+          
